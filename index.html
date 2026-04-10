@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application de Cryptographie - KABANGA ABIGAËL</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Courier New', monospace;
+            background: #0a0e27;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Effet de fond réseau */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #0f1228;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        /* Section présentation - nom uniquement */
+        .presentation {
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #00ffff;
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 2px solid #00ffff;
+            position: relative;
+        }
+
+        .presentation h1 {
+            font-size: 3.5em;
+            margin-bottom: 0;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            letter-spacing: 2px;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Contenu principal */
+        .content {
+            padding: 40px;
+        }
+
+        /* Groupes de formulaire */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #00ffff;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input[type="text"], select, input[type="number"] {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #1a1f3a;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: #0a0e27;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+        }
+
+        input[type="text"]:focus, select:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.1);
+            background: #0f1228;
+        }
+
+        input[type="text"]::placeholder {
+            color: #2a2f4a;
+        }
+
+        select option {
+            background: #0a0e27;
+            color: #ffffff;
+        }
+
+        /* Section des clés */
+        .keys-section {
+            background: #0a0e27;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            display: none;
+            border: 1px solid #1a1f3a;
+            animation: slideDown 0.3s ease;
+        }
+
+        .keys-section.active {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .key-input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .key-input-group label {
+            font-size: 0.85em;
+            color: #7a7f9e;
+        }
+
+        .key-single {
+            margin-top: 15px;
+        }
+
+        .info-text {
+            font-size: 0.8em;
+            color: #7a7f9e;
+            margin-top: 8px;
+            display: block;
+        }
+
+        .warning-text {
+            color: #ff6b6b;
+        }
+
+        /* Section cryptage et décryptage */
+        .crypto-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .crypto-box {
+            background: #0a0e27;
+            padding: 25px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border: 1px solid #1a1f3a;
+        }
+
+        .crypto-box:hover {
+            transform: translateY(-5px);
+            border-color: #00ffff;
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.1);
+        }
+
+        .crypto-box h2 {
+            color: #00ffff;
+            margin-bottom: 20px;
+            border-left: 4px solid #00ffff;
+            padding-left: 15px;
+            font-size: 1.4em;
+            font-family: 'Courier New', monospace;
+        }
+
+        .result-box {
+            background: #0f1228;
+            border: 1px solid #1a1f3a;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 100px;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 15px;
+            color: #00ffff;
+            transition: all 0.3s ease;
+        }
+
+        .result-box:hover {
+            border-color: #00ffff;
+        }
+
+        button {
+            background: linear-gradient(135deg, #00ffff 0%, #0088aa 100%);
+            color: #0a0e27;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Courier New', monospace;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 255, 255, 0.3);
+            background: linear-gradient(135deg, #00dddd 0%, #0077aa 100%);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .crypto-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .presentation h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .key-input-group {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Scrollbar personnalisée */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0a0e27;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #00ffff;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0088aa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Section présentation - uniquement le nom, sans émoji -->
+        <div class="presentation">
+            <h1>KABANGA ABIGAËL</h1>
+        </div>
+
+        <div class="content">
+            <!-- Zone pour le mot à crypter/décrypter -->
+            <div class="form-group">
+                <label>TEXTE A TRAITER</label>
+                <input type="text" id="inputText" placeholder="Entrez votre texte ici..." autocomplete="off">
+            </div>
+
+            <!-- Sélection de l'algorithme -->
+            <div class="form-group">
+                <label>ALGORITHME DE CRYPTAGE</label>
+                <select id="algoSelect">
+                    <option value="additif">Chiffrement Additif (César)</option>
+                    <option value="multiplicatif">Chiffrement Multiplicatif</option>
+                    <option value="affine">Chiffrement Affine</option>
+                    <option value="autokey">Chiffrement Autokey (Autoclé)</option>
+                </select>
+            </div>
+
+            <!-- Section des clés pour Additif -->
+            <div id="additiveKeys" class="keys-section">
+                <label>PARAMETRES - CHIFFREMENT ADDITIF</label>
+                <div class="key-single">
+                    <label style="font-size: 0.85em;">Clé de décalage :</label>
+                    <input type="number" id="additiveKey" value="3" min="1" max="25" step="1">
+                </div>
+                <span class="info-text">Décalage de chaque lettre (César classique)</span>
+            </div>
+
+            <!-- Section des clés pour Multiplicatif -->
+            <div id="multiplicativeKeys" class="keys-section">
+                <label>PARAMETRES - CHIFFREMENT MULTIPLICATIF</label>
+                <div class="key-single">
+                    <label style="font-size: 0.85em;">Facteur multiplicateur :</label>
+                    <input type="number" id="multiplicativeKey" value="5" min="1" max="25" step="1">
+                </div>
+                <span class="info-text warning-text">⚠️ Doit être premier avec 26 (valeurs possibles: 1,3,5,7,9,11,15,17,19,21,23,25)</span>
+            </div>
+
+            <!-- Section des clés pour Affine (DEUX clés) -->
+            <div id="affineKeys" class="keys-section">
+                <label>PARAMETRES - CHIFFREMENT AFFINE</label>
+                <div class="key-input-group">
+                    <div>
+                        <label style="font-size: 0.85em;">Coefficient a :</label>
+                        <input type="number" id="affineA" value="5" min="1" max="25" step="1">
+                        <span class="info-text">Doit être premier avec 26</span>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.85em;">Coefficient b :</label>
+                        <input type="number" id="affineB" value="8" min="0" max="25" step="1">
+                        <span class="info-text">Décalage additif</span>
+                    </div>
+                </div>
+                <span class="info-text warning-text">⚠️ A doit être premier avec 26</span>
+            </div>
+
+            <!-- Section des clés pour Autokey -->
+            <div id="autokeyKeys" class="keys-section">
+                <label>PARAMETRES - CHIFFREMENT AUTOKEY</label>
+                <div class="key-single">
+                    <label style="font-size: 0.85em;">Clé initiale :</label>
+                    <input type="text" id="autokeyKey" placeholder="Entrez la clé (ex: KEY, SECRET, ...)" value="KEY">
+                </div>
+                <span class="info-text">La clé sert à initialiser le chiffrement autoclé</span>
+            </div>
+
+            <!-- Sections Cryptage et Décryptage -->
+            <div class="crypto-section">
+                <!-- Section Cryptage -->
+                <div class="crypto-box">
+                    <h2>CRYPTAGE</h2>
+                    <button onclick="crypter()">CHIFFRER LE TEXTE</button>
+                    <div class="result-box" id="encryptResult">
+                        Texte crypté 
+                    </div>
+                </div>
+
+                <!-- Section Décryptage -->
+                <div class="crypto-box">
+                    <h2>DECRYPTAGE</h2>
+                    <button onclick="decrypter()">DECHIFFRER LE TEXTE</button>
+                    <div class="result-box" id="decryptResult">
+                         Texte décrypté 
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fonctions utilitaires
+        function charToNum(char) {
+            return char.charCodeAt(0) - 65;
+        }
+        
+        function numToChar(num) {
+            let n = ((num % 26) + 26) % 26;
+            return String.fromCharCode(n + 65);
+        }
+        
+        // Fonction pour calculer l'inverse modulaire
+        function modInverse(a, m) {
+            a = ((a % m) + m) % m;
+            for (let x = 1; x < m; x++) {
+                if ((a * x) % m === 1) return x;
+            }
+            return 1;
+        }
+        
+        // Vérifier si un nombre est premier avec 26
+        function isCoprimeWith26(a) {
+            const gcd = (x, y) => {
+                while (y) {
+                    let t = y;
+                    y = x % y;
+                    x = t;
+                }
+                return x;
+            };
+            return gcd(a, 26) === 1;
+        }
+        
+        // 1. CHIFFREMENT ADDITIF (César)
+        function chiffrementAdditif(texte, decalage, isEncrypt = true) {
+            let result = "";
+            for (let char of texte.toUpperCase()) {
+                if (char >= 'A' && char <= 'Z') {
+                    let num = charToNum(char);
+                    let newNum = isEncrypt ? (num + decalage) % 26 : (num - decalage + 26) % 26;
+                    result += numToChar(newNum);
+                } else {
+                    result += char;
+                }
+            }
+            return result;
+        }
+        
+        // 2. CHIFFREMENT MULTIPLICATIF
+        function chiffrementMultiplicatif(texte, facteur, isEncrypt = true) {
+            if (!isCoprimeWith26(facteur)) {
+                return "ERREUR: La clé doit être première avec 26";
+            }
+            let result = "";
+            let invFacteur = modInverse(facteur, 26);
+            
+            for (let char of texte.toUpperCase()) {
+                if (char >= 'A' && char <= 'Z') {
+                    let num = charToNum(char);
+                    let newNum = isEncrypt ? (num * facteur) % 26 : (num * invFacteur) % 26;
+                    result += numToChar(newNum);
+                } else {
+                    result += char;
+                }
+            }
+            return result;
+        }
+        
+        // 3. CHIFFREMENT AFFINE
+        function chiffrementAffine(texte, a, b, isEncrypt = true) {
+            if (!isCoprimeWith26(a)) {
+                return "ERREUR: 'a' doit être premier avec 26";
+            }
+            let result = "";
+            let invA = modInverse(a, 26);
+            
+            for (let char of texte.toUpperCase()) {
+                if (char >= 'A' && char <= 'Z') {
+                    let num = charToNum(char);
+                    let newNum;
+                    if (isEncrypt) {
+                        newNum = (a * num + b) % 26;
+                    } else {
+                        newNum = (invA * (num - b + 26)) % 26;
+                    }
+                    result += numToChar(newNum);
+                } else {
+                    result += char;
+                }
+            }
+            return result;
+        }
+        
+        // 4. CHIFFREMENT AUTOKEY
+        function chiffrementAutokey(texte, cle, isEncrypt = true) {
+            texte = texte.toUpperCase();
+            cle = cle.toUpperCase();
+            
+            let cleanText = "";
+            let nonAlphaPositions = [];
+            for (let i = 0; i < texte.length; i++) {
+                if (texte[i] >= 'A' && texte[i] <= 'Z') {
+                    cleanText += texte[i];
+                } else {
+                    nonAlphaPositions.push({index: i, char: texte[i]});
+                }
+            }
+            
+            if (cleanText.length === 0) return texte;
+            
+            let result = "";
+            
+            if (isEncrypt) {
+                let keyStream = cle;
+                for (let i = 0; i < cleanText.length - cle.length; i++) {
+                    keyStream += cleanText[i];
+                }
+                
+                for (let i = 0; i < cleanText.length; i++) {
+                    let textNum = charToNum(cleanText[i]);
+                    let keyNum = charToNum(keyStream[i]);
+                    let cryptNum = (textNum + keyNum) % 26;
+                    result += numToChar(cryptNum);
+                }
+            } else {
+                let keyStream = cle;
+                let decryptedText = "";
+                
+                for (let i = 0; i < cleanText.length; i++) {
+                    let cryptNum = charToNum(cleanText[i]);
+                    let keyNum = charToNum(keyStream[i]);
+                    let textNum = (cryptNum - keyNum + 26) % 26;
+                    let decryptedChar = numToChar(textNum);
+                    decryptedText += decryptedChar;
+                    keyStream += decryptedChar;
+                }
+                result = decryptedText;
+            }
+            
+            let finalResult = "";
+            let resultIndex = 0;
+            for (let i = 0; i < texte.length; i++) {
+                if (texte[i] >= 'A' && texte[i] <= 'Z') {
+                    finalResult += result[resultIndex++] || '';
+                } else {
+                    finalResult += texte[i];
+                }
+            }
+            
+            return finalResult;
+        }
+        
+        // Gestion de l'affichage des sections de clés
+        const algoSelect = document.getElementById('algoSelect');
+        const additiveKeysDiv = document.getElementById('additiveKeys');
+        const multiplicativeKeysDiv = document.getElementById('multiplicativeKeys');
+        const affineKeysDiv = document.getElementById('affineKeys');
+        const autokeyKeysDiv = document.getElementById('autokeyKeys');
+        
+        function updateKeysVisibility() {
+            const selected = algoSelect.value;
+            additiveKeysDiv.classList.remove('active');
+            multiplicativeKeysDiv.classList.remove('active');
+            affineKeysDiv.classList.remove('active');
+            autokeyKeysDiv.classList.remove('active');
+            
+            if (selected === 'additif') {
+                additiveKeysDiv.classList.add('active');
+            } else if (selected === 'multiplicatif') {
+                multiplicativeKeysDiv.classList.add('active');
+            } else if (selected === 'affine') {
+                affineKeysDiv.classList.add('active');
+            } else if (selected === 'autokey') {
+                autokeyKeysDiv.classList.add('active');
+            }
+        }
+        
+        algoSelect.addEventListener('change', updateKeysVisibility);
+        updateKeysVisibility();
+        
+        // Fonction principale de cryptage
+        function crypter() {
+            let inputText = document.getElementById('inputText').value;
+            let algo = document.getElementById('algoSelect').value;
+            let result = "";
+            
+            if (inputText.trim() === "") {
+                document.getElementById('encryptResult').innerHTML = "[ ERREUR: Veuillez entrer un texte à crypter ]";
+                return;
+            }
+            
+            try {
+                switch(algo) {
+                    case 'additif':
+                        let addKey = parseInt(document.getElementById('additiveKey').value);
+                        result = chiffrementAdditif(inputText, addKey, true);
+                        break;
+                    case 'multiplicatif':
+                        let multKey = parseInt(document.getElementById('multiplicativeKey').value);
+                        result = chiffrementMultiplicatif(inputText, multKey, true);
+                        break;
+                    case 'affine':
+                        let a = parseInt(document.getElementById('affineA').value);
+                        let b = parseInt(document.getElementById('affineB').value);
+                        if (isNaN(a) || isNaN(b)) {
+                            result = "ERREUR: Veuillez entrer des valeurs valides pour a et b";
+                        } else {
+                            result = chiffrementAffine(inputText, a, b, true);
+                        }
+                        break;
+                    case 'autokey':
+                        let key = document.getElementById('autokeyKey').value;
+                        if (!key.trim()) {
+                            result = "ERREUR: Veuillez entrer une clé pour l'autokey";
+                        } else {
+                            result = chiffrementAutokey(inputText, key, true);
+                        }
+                        break;
+                    default:
+                        result = "ERREUR: Algorithme non reconnu";
+                }
+            } catch(e) {
+                result = "ERREUR: " + e.message;
+            }
+            
+            document.getElementById('encryptResult').innerHTML = result;
+        }
+        
+        // Fonction principale de décryptage
+        function decrypter() {
+            let inputText = document.getElementById('inputText').value;
+            let algo = document.getElementById('algoSelect').value;
+            let result = "";
+            
+            if (inputText.trim() === "") {
+                document.getElementById('decryptResult').innerHTML = "[ ERREUR: Veuillez entrer un texte à décrypter ]";
+                return;
+            }
+            
+            try {
+                switch(algo) {
+                    case 'additif':
+                        let addKey = parseInt(document.getElementById('additiveKey').value);
+                        result = chiffrementAdditif(inputText, addKey, false);
+                        break;
+                    case 'multiplicatif':
+                        let multKey = parseInt(document.getElementById('multiplicativeKey').value);
+                        result = chiffrementMultiplicatif(inputText, multKey, false);
+                        break;
+                    case 'affine':
+                        let a = parseInt(document.getElementById('affineA').value);
+                        let b = parseInt(document.getElementById('affineB').value);
+                        if (isNaN(a) || isNaN(b)) {
+                            result = "ERREUR: Veuillez entrer des valeurs valides pour a et b";
+                        } else {
+                            result = chiffrementAffine(inputText, a, b, false);
+                        }
+                        break;
+                    case 'autokey':
+                        let key = document.getElementById('autokeyKey').value;
+                        if (!key.trim()) {
+                            result = "ERREUR: Veuillez entrer une clé pour l'autokey";
+                        } else {
+                            result = chiffrementAutokey(inputText, key, false);
+                        }
+                        break;
+                    default:
+                        result = "ERREUR: Algorithme non reconnu";
+                }
+            } catch(e) {
+                result = "ERREUR: " + e.message;
+            }
+            
+            document.getElementById('decryptResult').innerHTML = result;
+        }
+        
+        // Validations
+        document.getElementById('multiplicativeKey').addEventListener('change', function() {
+            let val = parseInt(this.value);
+            if (!isCoprimeWith26(val)) {
+                alert("Attention: " + val + " n'est pas premier avec 26 ! Le décryptage ne fonctionnera pas. Utilisez: 1,3,5,7,9,11,15,17,19,21,23,25");
+            }
+        });
+        
+        document.getElementById('affineA').addEventListener('change', function() {
+            let val = parseInt(this.value);
+            if (!isCoprimeWith26(val)) {
+                alert("Attention: " + val + " n'est pas premier avec 26 ! Le décryptage ne fonctionnera pas. Utilisez: 1,3,5,7,9,11,15,17,19,21,23,25");
+            }
+        });
+        
+        // Effet visuel
+        document.getElementById('inputText').addEventListener('input', function() {
+            if (this.value.trim() !== "") {
+                this.style.borderColor = "#00ffff";
+            } else {
+                this.style.borderColor = "#1a1f3a";
+            }
+        });
+    </script>
+</body>
+</html>
